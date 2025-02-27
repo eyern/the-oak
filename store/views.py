@@ -209,7 +209,7 @@ token = os.getenv("token")
 publishable_key = os.getenv("INTASEND_PUBLISHABLE_KEY")
 
 def initiate_stk_push(response):
-    url = "https://sandbox.intasend.com/api/v1/payment/mpesa-stk-push/"
+    url = "https://payment.intasend.com/api/"
 
     payload = {
     "amount": "total_amount",
@@ -223,7 +223,7 @@ def initiate_stk_push(response):
 
     response = requests.post(url, json=payload, headers=headers)
 
-    return(response.text)
+    print(response.text)
 
 
 @login_required

@@ -14,7 +14,7 @@
               <div class="col-lg-6 text-lg-right">
                 <nav aria-label="breadcrumb">
                   <ol class="breadcrumb justify-content-lg-end mb-0 px-0">
-                    <li class="breadcrumb-item"><a href="index.html">Home</a></li>
+                    <li class="breadcrumb-item"><a href="{% url 'store:home' %}">Home</a></li>
                     <li class="breadcrumb-item active" aria-current="page">Cart</li>
                   </ol>
                 </nav>
@@ -127,45 +127,197 @@
                     {% endif %}
 
                     <!-- Set up a container element for the button -->
-                    <script src="https://www.paypal.com/sdk/js?client-id=YOUR_CLIENT_ID&components=buttons"></script>
-    
-                    <script>
-                      paypal.Buttons({
-                      style: {
-                      layout: 'vertical',
-                      color:  'blue',
-                      shape:  'rect',
-                      label:  'paypal'	  }
-                    }).render('#paypal-button-container');
-                    </script>
-                    <script>
-                        // Render the PayPal button into #paypal-button-container
-                        paypal.Buttons({
+                    <!-- // PAYMENT BUTTON // -->
+                    <style>
+                      /* PAY BUTTON */
+                      :root{
+                      /* COLORS */
+                          --light-white-color: hsl(216, 20%, 95%); 
+                          --medium-white-color: hsl(217, 35%, 83%); 
+                          --light-gray-color: hsla(0, 0%, 100%, 0.15); 
+                          --light-purple-color: hsl(129, 89%, 28%); 
+                          --medium-purple-color: hsl(129, 89%, 28%); 
+                          --white-color: hsl(0, 0%, 100%); 
+                          --shadow-color: hsla(0, 0%, 0%, 0.2);
+                          --light-green-color: hsl(134, 61%, 41%);
+                          --dark-green-color: hsl(133, 61%, 33%); 
+                          --glow-light-green-color: hsl(134, 61%, 41%);
+                          --glow-dark-green-color: hsla(134, 61%, 41%, 0.702);
 
-                            // Set up the transaction
-                            createOrder: function(data, actions) {
-                                return actions.order.create({
-                                    purchase_units: [{
-                                        amount: {
-                                            value: '{{total_amount}}'
-                                        }
-                                    }]
-                                });
-                            },
+                          /* FONT-WEIGHT */
+                          --big-font-weight: 800; 
+                          --medium-font-weight: 600; 
+                          --middle-font-weight: 500; 
+                          --small-font-weight: 400; 
+                      }  
+                    
+                    .payment-button{
+                        position: relative;
+                        padding: 8px 50px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        border: none;
+                        border-radius: 70px;
+                        font-size: 1em;
+                        font-weight: var(--medium-font-weight);
+                        color: var(--white-color);
+                        background: linear-gradient(135deg, var(--light-purple-color), var(--medium-purple-color));
+                        cursor: pointer;
+                        transition: background-position 0.4s ease, transform 0.3s ease;
+                        box-shadow: 0 8px 20px var(--shadow-color);
+                    }
+                    .payment-button:disabled{
+                        cursor: not-allowed;
+                    }
+                    .button-loader{
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        width: 20px;
+                        height: 20px;
+                        border: 3px solid transparent;
+                        border-radius: 50%;
+                        border-top-color: var(--white-color);
+                        transform: translate(-50%, -50%);
+                        transition: opacity .3s ease-in;
+                        animation: load 1s linear infinite;
+                        opacity: 0;
+                        visibility: hidden;
+                    }
+                    @keyframes load{
+                        from{
+                            transform: translate(-50%, -50%) rotate(0deg);
+                        }
+                        to{
+                            transform: translate(-50%, -50%) rotate(360deg);
+                        }
+                    }
+                    .processing .button-loader{
+                        opacity: 1;
+                        visibility: visible;
+                    }
+                    .processing .button-text{
+                        opacity: 0;
+                        visibility: hidden;
+                    }
+                    .processing::after{
+                        content: '';
+                        position: absolute;
+                        top: 0;
+                        left: 0;
+                        right: 0;
+                        bottom: 0;
+                        border-radius: 30px;
+                        background: var(--light-gray-color);
+                        animation: processing 1.5s infinite;
+                    }
+                    @keyframes processing{
+                        0%{
+                            transform: scale(1);
+                            opacity: 1;
+                        }
+                        50%{
+                            transform: scale(1.05);
+                            opacity: 0.7;
+                        }
+                        100%{
+                            transform: scale(1);
+                            opacity: 1;
+                        }
+                    }
+                    .payment-button.paid{
+                        background: linear-gradient(135deg, var(--light-green-color), var(--dark-green-color));
+                        animation: glow 1.5s ease-in-out infinite alternate;
+                        background-position: 100% 0;
+                    }
+                    @keyframes glow{
+                        0%{
+                            box-shadow: 0 0 10px var(--glow-light-green-color);
+                        }
+                        100%{
+                            box-shadow: 0 0 20px var(--glow-dark-green-color);
+                        }
+                    }
+                    .paid .button-text{
+                        opacity: 0;
+                        visibility: hidden;
+                    }
+                    .button-text{
+                        transition: opacity 0.3s ease;
+                    }
+                    .paid .button-loader{
+                        display: none;
+                    }
+                    .paid::before {
+                        content: '✔';
+                        position: absolute;
+                        font-size: 1.2em;
+                        color: var(--white-color);
+                        animation: check .5s ease-in;
+                        z-index: 2;
+                    }
+                    @keyframes check{
+                        0%{
+                            transform: scale(0);
+                            opacity: 0;
+                        }
+                        100%{
+                            transform: scale(1);
+                            opacity: 1;
+                        }
+                    }
+                        /* BREAKPOINT */
+                    @media screen and (max-width: 1120px){
+                        .button-text{
+                            font-size: .9em;
+                        }
+                    }
+                    @media screen and (max-width: 867px){
+                        .button-text{
+                            font-size: .875em;
+                        }
+                    }
+                    @media screen and (max-width: 450px){
+                        .button-text{
+                            font-size: .8em;
+                        }
+                    }
+                    </style>
+                    <div class="payment-container">
+                      <button id="paymentButton" class="payment-button">
+                          <span class="button-text">
+                              Complete Order
+                              <i class="ri-bank-card-fill"></i></span>
+                          <span class="button-loader"></span>
+                      </button>
+                  </div>
+                  <script>
+                    // PAY BUTTON //
+                    document.getElementById('paymentButton').addEventListener('click', function() {
+                        let button = this;
 
-                            // Finalize the transaction
-                            onApprove: function(data, actions) {
-                                return actions.order.capture().then(function(details) {
-                                    // Show a success message to the buyer
-                                    alert('Transaction completed by ' + details.payer.name.given_name + '!');
-                                    // Savind Order in Database after Payment Success
-                                    document.getElementById('myform').submit();
-                                });
-                            }
+                        // SHOW PROCESSING
+                        button.classList.add('processing');
+                        button.disabled = true;
 
-
-                        }).render('#paypal-button-container');
-                    </script>
+                        // SIMULATION OF PROCESSING
+                        setTimeout(function() {
+                            button.classList.remove('processing');
+                            button.classList.add('paid');
+                        }, 10000); 
+                    });
+                  </script>
+                  <script>
+                     new window.IntaSend({
+                      // Replace with your Publishable Key
+                      publicAPIKey: "ISPubKey_live_3b062505-b4a7-4837-bcd8-e1f748abf8e2",
+                      live: true //set to true when going live
+                    })
+                    .on("COMPLETE", (results) => {console.log("Do something on success", results)})
+                    .on("FAILED", (results) => {console.log("Do something on failure", results)})
+                    .on("IN-PROGRESS", (results) => {console.log("Payment in progress status", results)})
+                  </script>
 
                     {% comment %} For Cash on Delivery {% endcomment %}
 
